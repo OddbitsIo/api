@@ -8,18 +8,20 @@ import (
 )
 
 type OrganizationCtrl struct {
-	OrganizationService contracts.IOrganizationService
+	Service contracts.IOrganizationService
+	Utils ICtrlUtils
 }
 
-func CreateOrganizationCtrl() *OrganizationCtrl {
-	return &OrganizationCtrl { 
-		OrganizationService : &services.Organization {
-			OrganizationRepo : &mdbrepos.Organization {}}}
+func createOrganizationCtrl() *OrganizationCtrl {
+	return &OrganizationCtrl {
+		Utils: &CtrlUtils{},
+		Service: &services.Organization {
+			OrganizationRepo: &mdbrepos.Organization {}}}
 }
 
-func (ctrl *OrganizationCtrl) GetOrganization(writer http.ResponseWriter, request *http.Request) {
-	params := GetParams(request)
+func (this *OrganizationCtrl) GetOrganization(writer http.ResponseWriter, request *http.Request) {
+	params := this.Utils.GetParams(request)
 	id := params["id"]
-	org, err := ctrl.OrganizationService.Get(id);
-	HandleGetResult(writer, request, org, err)
+	org, err := this.Service.Get(id);
+	this.Utils.HandleGetResult(writer, request, org, err)
 }
