@@ -6,8 +6,10 @@ import (
 	"errors"
 	"strings"
 	"net/http/httptest"
+	"github.com/gorilla/mux"
 	"github.com/oddbitsio/api/contracts"
 	"github.com/oddbitsio/api/rest-server"
+	"encoding/json"
 )
 
 type OrganizationSvcMock struct {
@@ -18,28 +20,20 @@ func (this *OrganizationSvcMock) Get(id string) (*contracts.OrganizationResult, 
 	return this.GetFunc(id)
 }
 
-func createOrganizationTestCtrl() *main.OrganizationCtrl {
-	return &main.OrganizationCtrl { 
-		ResponseWriter: &main.ResponseWriter { }}
-}
-
 func TestGetOrganization_NotFound(t *testing.T) {
-	orgId := "123"
-
-	ctrl := createOrganizationTestCtrl()
+	var router = mux.NewRouter()
+	ctrl := main.CreateOrganizationCtrl().RegisterRoutes(router)
 	ctrl.Service = &OrganizationSvcMock {
 		GetFunc: func(id string) (*contracts.OrganizationResult, error) {
-			if id != orgId {
-				t.Errorf("Inexpected id: %s", id)
+			if (id != "123") {
+				t.Errorf("Incorrect id: %s", id)
 			}
             return &contracts.OrganizationResult {}, nil
 		}}
-	ctrl.ParamProvider = &ParamProviderMock {
-		GetResult: map[string] string { "id": orgId } }
 		
-	request, _:= http.NewRequest("GET", "/test", nil)
+	request, _:= http.NewRequest("GET", "/organization/123", nil)
 	recorder := httptest.NewRecorder()
-	ctrl.GetOrganization(recorder, request)
+	router.ServeHTTP(recorder, request)
 
     if recorder.Code != http.StatusNotFound {
         t.Errorf("Incorrect status code: %d", recorder.Code)
@@ -47,22 +41,21 @@ func TestGetOrganization_NotFound(t *testing.T) {
 }
 
 func TestGetOrganization_Error(t *testing.T) {
-	orgId := "123"
 	errorMsg := "suprise!"
-	ctrl := createOrganizationTestCtrl()
+
+	var router = mux.NewRouter()
+	ctrl := main.CreateOrganizationCtrl().RegisterRoutes(router)
 	ctrl.Service = &OrganizationSvcMock {
 		GetFunc: func(id string) (*contracts.OrganizationResult, error) {
-			if id != orgId {
+			if id != "456" {
 				t.Errorf("Inexpected id: %s", id)
 			}
             return &contracts.OrganizationResult {}, errors.New(errorMsg)
 		}}
-	ctrl.ParamProvider = &ParamProviderMock {
-		GetResult: map[string] string { "id": orgId } }
 		
-	request, _:= http.NewRequest("GET", "/test", nil)
+	request, _:= http.NewRequest("GET", "/organization/456", nil)
 	recorder := httptest.NewRecorder()
-	ctrl.GetOrganization(recorder, request)
+	router.ServeHTTP(recorder, request)
 
     if recorder.Code != http.StatusBadRequest {
         t.Errorf("Incorrect status code: %d", recorder.Code)
@@ -70,5 +63,36 @@ func TestGetOrganization_Error(t *testing.T) {
 	var body = strings.TrimSpace(recorder.Body.String())
 	if body != errorMsg {
 		t.Errorf("Invalid response body: %s", body)
+	}
+}
+
+func TestGetOrganization_Success(t *testing.T) {
+	var router = mux.NewRouter()
+	ctrl := main.CreateOrganizationCtrl().RegisterRoutes(router)
+	orgResult := &contracts.OrganizationResult {
+			Id: "2",
+			Name: "OrgName",
+			TaxId: "OrgTaxId"}
+
+	ctrl.Service = &OrganizationSvcMock {
+		GetFunc: func(id string) (*contracts.OrganizationResult, error) {
+			if id != "2" {
+				t.Errorf("Inexpected id: %s", id)
+			}
+            return orgResult, nil
+		}}
+		
+	request, _:= http.NewRequest("GET", "/organization/2", nil)
+	recorder := httptest.NewRecorder()
+	router.ServeHTTP(recorder, request)
+
+    if recorder.Code != http.StatusOK {
+        t.Errorf("Incorrect status code: %d", recorder.Code)
+	}
+
+	decodedResult := contracts.OrganizationResult { }
+	json.NewDecoder(recorder.Body).Decode(&decodedResult)
+	if decodedResult != *orgResult {
+		t.Error("Bad message body")
 	}
 }

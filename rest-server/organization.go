@@ -2,6 +2,7 @@ package main
 
 import (
 	"net/http"
+	"github.com/gorilla/mux"
 	"github.com/oddbitsio/api/contracts"
 	"github.com/oddbitsio/api/services"
 	"github.com/oddbitsio/api/mdb-repos"
@@ -9,20 +10,23 @@ import (
 
 type OrganizationCtrl struct {
 	Service contracts.IOrganizationService
-	ParamProvider IParamProvider
-	ResponseWriter IResponseWriter
+	Utils ICtrlUtils
 }
 
-func createOrganizationCtrl() *OrganizationCtrl {
+func CreateOrganizationCtrl() *OrganizationCtrl {
 	return &OrganizationCtrl {
-		ParamProvider: &ParamProvider {},
-		ResponseWriter: &ResponseWriter {},
+		Utils: &CtrlUtils {},
 		Service: &services.Organization {
 			OrganizationRepo: &mdbrepos.Organization {}}}
 }
 
+func (this *OrganizationCtrl) RegisterRoutes(router *mux.Router) *OrganizationCtrl {
+	router.Handle("/organization/{id}", comboHandler(this.GetOrganization)).Methods("GET")
+	return this
+}
+
 func (this *OrganizationCtrl) GetOrganization(writer http.ResponseWriter, request *http.Request) {
-	id := this.ParamProvider.Get(request)["id"]
+	id := this.Utils.Get(request)["id"]
 	org, err := this.Service.Get(id);
-	this.ResponseWriter.WriteJsonResult(writer, request, org, err)
+	this.Utils.WriteJsonResult(writer, request, org, err)
 }
