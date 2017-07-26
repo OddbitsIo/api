@@ -6,6 +6,10 @@ type OrganizationDto struct {
 	TaxId string
 }
 
+func (this * OrganizationDto) IsEmpty() bool {
+	return this.Id == ""
+}
+
 type IOrganizationRepository interface {
 	Get(id string) (*OrganizationDto, error)
 	Save(organization *OrganizationDto) error

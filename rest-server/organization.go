@@ -9,19 +9,20 @@ import (
 
 type OrganizationCtrl struct {
 	Service contracts.IOrganizationService
-	Utils ICtrlUtils
+	ParamProvider IParamProvider
+	ResponseWriter IResponseWriter
 }
 
 func createOrganizationCtrl() *OrganizationCtrl {
 	return &OrganizationCtrl {
-		Utils: &CtrlUtils{},
+		ParamProvider: &ParamProvider {},
+		ResponseWriter: &ResponseWriter {},
 		Service: &services.Organization {
 			OrganizationRepo: &mdbrepos.Organization {}}}
 }
 
 func (this *OrganizationCtrl) GetOrganization(writer http.ResponseWriter, request *http.Request) {
-	params := this.Utils.GetParams(request)
-	id := params["id"]
+	id := this.ParamProvider.Get(request)["id"]
 	org, err := this.Service.Get(id);
-	this.Utils.HandleGetResult(writer, request, org, err)
+	this.ResponseWriter.WriteJsonResult(writer, request, org, err)
 }

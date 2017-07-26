@@ -14,13 +14,14 @@ func main() {
 	router := mux.NewRouter()
 	
 	orgCtrl := createOrganizationCtrl()
-	router.Handle("/organization/{id}", getHandler(orgCtrl.GetOrganization)).Methods("GET")
+	router.Handle("/organization/{id}", comboHandler(orgCtrl.GetOrganization)).Methods("GET")
 	
-
 	log.Printf("Listening on :%d", httpPort)
     log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", httpPort), router))
 }
 
-func getHandler(routeHandler func(writer http.ResponseWriter, request *http.Request)) http.Handler {
-	return handlers.LoggingHandler(os.Stdout, http.HandlerFunc(routeHandler))
+type comboHandler func (writer http.ResponseWriter, request *http.Request)
+
+func (this comboHandler) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
+	handlers.LoggingHandler(os.Stdout, http.HandlerFunc(this)).ServeHTTP(writer, request)
 }
