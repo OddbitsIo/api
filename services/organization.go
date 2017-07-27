@@ -2,24 +2,23 @@ package services
 
 import (
 	"github.com/oddbitsio/api/core"
-	"github.com/oddbitsio/api/contracts"
 )
 
-
-type Organization struct {
-	OrganizationRepo core.IOrganizationRepository
+type IOrganizationRepo interface {
+	Get(code string) (*core.OrganizationModel, error)
+	Save(organization *core.OrganizationModel) error
 }
 
-func (service *Organization) Get(id string) (*contracts.OrganizationResult, error) {
-	org, err := service.OrganizationRepo.Get(id)
-	if (err != nil) {
-		return nil, err
-	}
+type OrganizationSvc struct {
+	OrganizationRepo IOrganizationRepo
+}
 
-	result := &contracts.OrganizationResult {
-		Id: org.Id,
-		Name: org.Name,
-		TaxId: org.TaxId }
-		
-	return result, nil
+func (this *OrganizationSvc) Get(code string) (*core.OrganizationModel, error) {
+	org, err := this.OrganizationRepo.Get(code)
+	return org, err
+}
+
+func (this *OrganizationSvc) Save(organization *core.OrganizationModel) error  {
+	err := this.OrganizationRepo.Save(organization)
+	return err
 }

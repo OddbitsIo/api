@@ -7,28 +7,33 @@ import (
 	"strings"
 	"net/http/httptest"
 	"github.com/gorilla/mux"
-	"github.com/oddbitsio/api/contracts"
+	"github.com/oddbitsio/api/core"
 	"github.com/oddbitsio/api/rest-server"
 	"encoding/json"
 )
 
 type OrganizationSvcMock struct {
-	GetFunc func(string) (*contracts.OrganizationResult, error)
+	GetFunc func(string) (*core.OrganizationModel, error)
+	SaveFunc func(organization *core.OrganizationModel) error
 }
 
-func (this *OrganizationSvcMock) Get(id string) (*contracts.OrganizationResult, error) {
-	return this.GetFunc(id)
+func (this *OrganizationSvcMock) Get(code string) (*core.OrganizationModel, error) {
+	return this.GetFunc(code)
+}
+
+func (this *OrganizationSvcMock) Save(organization *contracts.OrganizationModel) error {
+	return this.SaveFunc(organization)
 }
 
 func TestGetOrganization_NotFound(t *testing.T) {
 	var router = mux.NewRouter()
 	ctrl := main.CreateOrganizationCtrl().RegisterRoutes(router)
 	ctrl.Service = &OrganizationSvcMock {
-		GetFunc: func(id string) (*contracts.OrganizationResult, error) {
+		GetFunc: func(id string) (*contracts.OrganizationModel, error) {
 			if (id != "123") {
 				t.Errorf("Incorrect id: %s", id)
 			}
-            return &contracts.OrganizationResult {}, nil
+            return &contracts.OrganizationModel {}, nil
 		}}
 		
 	request, _:= http.NewRequest("GET", "/organization/123", nil)
@@ -46,11 +51,11 @@ func TestGetOrganization_Error(t *testing.T) {
 	var router = mux.NewRouter()
 	ctrl := main.CreateOrganizationCtrl().RegisterRoutes(router)
 	ctrl.Service = &OrganizationSvcMock {
-		GetFunc: func(id string) (*contracts.OrganizationResult, error) {
-			if id != "456" {
-				t.Errorf("Inexpected id: %s", id)
+		GetFunc: func(code string) (*core.OrganizationModel, error) {
+			if code != "456" {
+				t.Errorf("Inexpected code: %s", code)
 			}
-            return &contracts.OrganizationResult {}, errors.New(errorMsg)
+            return &core.OrganizationModel {}, errors.New(errorMsg)
 		}}
 		
 	request, _:= http.NewRequest("GET", "/organization/456", nil)
@@ -69,15 +74,17 @@ func TestGetOrganization_Error(t *testing.T) {
 func TestGetOrganization_Success(t *testing.T) {
 	var router = mux.NewRouter()
 	ctrl := main.CreateOrganizationCtrl().RegisterRoutes(router)
-	orgResult := &contracts.OrganizationResult {
-			Id: "2",
+	orgResult := &core.OrganizationModel {
+			//Id: "2",
+			Code: "Test",
 			Name: "OrgName",
-			TaxId: "OrgTaxId"}
+			TaxId: "OrgTaxId",
+		}
 
 	ctrl.Service = &OrganizationSvcMock {
-		GetFunc: func(id string) (*contracts.OrganizationResult, error) {
-			if id != "2" {
-				t.Errorf("Inexpected id: %s", id)
+		GetFunc: func(code string) (*core.OrganizationModel, error) {
+			if code != "2" {
+				t.Errorf("Inexpected code: %s", code)
 			}
             return orgResult, nil
 		}}
@@ -90,7 +97,7 @@ func TestGetOrganization_Success(t *testing.T) {
         t.Errorf("Incorrect status code: %d", recorder.Code)
 	}
 
-	decodedResult := contracts.OrganizationResult { }
+	decodedResult := core.OrganizationModel { }
 	json.NewDecoder(recorder.Body).Decode(&decodedResult)
 	if decodedResult != *orgResult {
 		t.Error("Bad message body")

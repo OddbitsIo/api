@@ -1,16 +1,12 @@
 package core
 
-type OrganizationDto struct {
-	Id string
-	Name string
-	TaxId string
+type OrganizationModel struct {
+	//Id string `json:"id"`
+	Code string `json:"code"`
+	Name string `json:"name"` 
+	TaxId string `json:"taxId"`
 }
 
-func (this * OrganizationDto) IsEmpty() bool {
-	return this.Id == ""
-}
-
-type IOrganizationRepository interface {
-	Get(id string) (*OrganizationDto, error)
-	Save(organization *OrganizationDto) error
+func (this *OrganizationModel) IsEmpty() bool {
+	return this.Code == ""
 }
