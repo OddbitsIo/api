@@ -1,7 +1,7 @@
 package core
 
 type OrganizationModel struct {
-	//Id string `json:"id"`
+	Id string `json:"id"`
 	Code string `json:"code"`
 	Name string `json:"name"` 
 	TaxId string `json:"taxId"`

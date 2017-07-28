@@ -21,7 +21,7 @@ func (this *OrganizationSvcMock) Get(code string) (*core.OrganizationModel, erro
 	return this.GetFunc(code)
 }
 
-func (this *OrganizationSvcMock) Save(organization *contracts.OrganizationModel) error {
+func (this *OrganizationSvcMock) Save(organization *core.OrganizationModel) error {
 	return this.SaveFunc(organization)
 }
 
@@ -29,11 +29,11 @@ func TestGetOrganization_NotFound(t *testing.T) {
 	var router = mux.NewRouter()
 	ctrl := main.CreateOrganizationCtrl().RegisterRoutes(router)
 	ctrl.Service = &OrganizationSvcMock {
-		GetFunc: func(id string) (*contracts.OrganizationModel, error) {
+		GetFunc: func(id string) (*core.OrganizationModel, error) {
 			if (id != "123") {
-				t.Errorf("Incorrect id: %s", id)
+				t.Errorf("Incorrect code: %s", id)
 			}
-            return &contracts.OrganizationModel {}, nil
+            return &core.OrganizationModel {}, nil
 		}}
 		
 	request, _:= http.NewRequest("GET", "/organization/123", nil)
@@ -75,21 +75,20 @@ func TestGetOrganization_Success(t *testing.T) {
 	var router = mux.NewRouter()
 	ctrl := main.CreateOrganizationCtrl().RegisterRoutes(router)
 	orgResult := &core.OrganizationModel {
-			//Id: "2",
-			Code: "Test",
-			Name: "OrgName",
-			TaxId: "OrgTaxId",
-		}
+		Code: "Test",
+		Name: "OrgName",
+		TaxId: "OrgTaxId",
+	}
 
 	ctrl.Service = &OrganizationSvcMock {
 		GetFunc: func(code string) (*core.OrganizationModel, error) {
-			if code != "2" {
+			if code != "Test" {
 				t.Errorf("Inexpected code: %s", code)
 			}
             return orgResult, nil
 		}}
 		
-	request, _:= http.NewRequest("GET", "/organization/2", nil)
+	request, _:= http.NewRequest("GET", "/organization/Test", nil)
 	recorder := httptest.NewRecorder()
 	router.ServeHTTP(recorder, request)
 

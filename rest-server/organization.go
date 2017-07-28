@@ -27,14 +27,14 @@ func CreateOrganizationCtrl() *OrganizationCtrl {
 }
 
 func (this *OrganizationCtrl) RegisterRoutes(router *mux.Router) *OrganizationCtrl {
-	router.Handle("/organization/{id}", comboHandler(this.GetOrganization)).Methods("GET")
+	router.Handle("/organization/{code}", comboHandler(this.GetOrganization)).Methods("GET")
 	router.Handle("/organization", comboHandler(this.SaveOrganization)).Methods("POST")
 	return this
 }
 
 func (this *OrganizationCtrl) GetOrganization(writer http.ResponseWriter, request *http.Request) {
-	id := this.Utils.Get(request)["id"]
-	org, err := this.Service.Get(id);
+	code := this.Utils.GetParams(request)["code"]
+	org, err := this.Service.Get(code);
 	this.Utils.WriteJsonResult(writer, request, org, err)
 }
 

@@ -8,7 +8,7 @@ import (
 
 
 type OrganizationDto struct {
-	//Id string
+	Id bson.ObjectId `bson:"_id,omitempty"`
 	Code string `bson:"code"`
 	Name string `bson:"name"`
 	TaxId string `bson:"taxId"`
@@ -20,6 +20,7 @@ type OrganizationRepo struct {
 
 func (this *OrganizationRepo) toModel(dto *OrganizationDto) *core.OrganizationModel {
 	return &core.OrganizationModel {
+		Id: dto.Id.Hex(),
 		Code: dto.Code,
 		Name: dto.Name,
 		TaxId: dto.TaxId,
@@ -27,11 +28,17 @@ func (this *OrganizationRepo) toModel(dto *OrganizationDto) *core.OrganizationMo
 }
 
 func (this *OrganizationRepo) toDto(model *core.OrganizationModel) *OrganizationDto {
-	return &OrganizationDto {
+	dto := &OrganizationDto {
 		Code: model.Code,
 		Name: model.Name,
 		TaxId: model.TaxId,
 	}
+
+	if model.Id != "" {
+		dto.Id = bson.ObjectIdHex(model.Id)
+	}
+
+	return dto
 }
 
 func (this *OrganizationRepo) Get(code string) (*core.OrganizationModel, error) {
@@ -82,7 +89,7 @@ func (this *OrganizationRepo) Save(model *core.OrganizationModel) error  {
 	collection := session.DB("oddbits").C("organizations")
 
 	index := mgo.Index {
-		Key:        []string{ "Code" },
+		Key:        []string{ "code" },
 		Unique:     true,
 	}
 	
@@ -91,7 +98,14 @@ func (this *OrganizationRepo) Save(model *core.OrganizationModel) error  {
 	}
 
 	dto := this.toDto(model)
-	_, err = collection.Upsert(bson.M{"Code": dto.Code}, &dto)
+
+	var selector map[string]interface{}
+	if dto.Id.Valid() {
+		selector = bson.M{"_id": dto.Id}
+	} else {
+		selector = bson.M{"code": dto.Code}
+	}
+	_, err = collection.Upsert(selector, &dto)
 
 	return err
 }

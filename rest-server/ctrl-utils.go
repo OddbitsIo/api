@@ -10,13 +10,13 @@ import (
 )
 
 type ICtrlUtils interface {
-	Get(request *http.Request) map[string]string 
+	GetParams(request *http.Request) map[string]string 
 	WriteJsonResult(writer http.ResponseWriter, request *http.Request, result core.IModel, err error) 
 }
 
 type CtrlUtils struct { }
 
-func (this *CtrlUtils) Get(request *http.Request) map[string]string {
+func (this *CtrlUtils) GetParams(request *http.Request) map[string]string {
 	return mux.Vars(request);
 }
 
