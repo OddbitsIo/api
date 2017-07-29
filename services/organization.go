@@ -7,6 +7,7 @@ import (
 type IOrganizationRepo interface {
 	Get(code string) (*core.OrganizationModel, error)
 	Save(organization *core.OrganizationModel) error
+	Delete(code string) error
 }
 
 type OrganizationSvc struct {
@@ -19,6 +20,9 @@ func (this *OrganizationSvc) Get(code string) (*core.OrganizationModel, error) {
 }
 
 func (this *OrganizationSvc) Save(organization *core.OrganizationModel) error  {
-	err := this.OrganizationRepo.Save(organization)
-	return err
+	return this.OrganizationRepo.Save(organization)
+}
+
+func (this *OrganizationSvc) Delete(code string) error {
+	return this.OrganizationRepo.Delete(code)
 }

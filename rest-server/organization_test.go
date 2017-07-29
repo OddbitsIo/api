@@ -15,6 +15,7 @@ import (
 type OrganizationSvcMock struct {
 	GetFunc func(string) (*core.OrganizationModel, error)
 	SaveFunc func(organization *core.OrganizationModel) error
+	DeleteFunc func(string) error
 }
 
 func (this *OrganizationSvcMock) Get(code string) (*core.OrganizationModel, error) {
@@ -23,6 +24,10 @@ func (this *OrganizationSvcMock) Get(code string) (*core.OrganizationModel, erro
 
 func (this *OrganizationSvcMock) Save(organization *core.OrganizationModel) error {
 	return this.SaveFunc(organization)
+}
+
+func (this *OrganizationSvcMock) Delete(code string) error {
+	return this.Delete(code)
 }
 
 func TestGetOrganization_NotFound(t *testing.T) {

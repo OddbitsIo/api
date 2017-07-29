@@ -109,3 +109,27 @@ func (this *OrganizationRepo) Save(model *core.OrganizationModel) error  {
 
 	return err
 }
+
+func (this *OrganizationRepo) Delete(code string) error  {
+	session, err := mgo.Dial("127.0.0.1")
+	if err != nil {
+		return err
+	}
+
+	defer session.Close()
+
+	credentials := mgo.Credential {
+		Username: "oddbits",
+		Password: "yellowcamelridesbike",
+	}
+	if err = session.Login(&credentials); err != nil {
+		return err
+	}
+
+	session.SetMode(mgo.Strong, true)
+
+	collection := session.DB("oddbits").C("organizations")
+
+	return collection.Remove(bson.M{"code": code})
+}
+
