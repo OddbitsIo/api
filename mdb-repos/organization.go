@@ -6,7 +6,6 @@ import (
 	"github.com/oddbitsio/api/core"
 )
 
-
 type OrganizationDto struct {
 	Id bson.ObjectId `bson:"_id,omitempty"`
 	Code string `bson:"code"`
@@ -14,9 +13,7 @@ type OrganizationDto struct {
 	TaxId string `bson:"taxId"`
 }
 
-type OrganizationRepo struct {
-
-}
+type OrganizationRepo struct { }
 
 func (this *OrganizationRepo) toModel(dto *OrganizationDto) *core.OrganizationModel {
 	return &core.OrganizationModel {
@@ -42,49 +39,22 @@ func (this *OrganizationRepo) toDto(model *core.OrganizationModel) *Organization
 }
 
 func (this *OrganizationRepo) Get(code string) (*core.OrganizationModel, error) {
-	session, err := mgo.Dial("127.0.0.1")
-	if err != nil {
-		return nil, err
-	}
-
+	session := db.getSession();
 	defer session.Close()
-	
-	credentials := mgo.Credential {
-		Username: "oddbits",
-		Password: "yellowcamelridesbike",
-	}
-	if err = session.Login(&credentials); err != nil {
-		return nil, err
-	}
-
-	session.SetMode(mgo.Monotonic, true)
 
 	collection := session.DB("oddbits").C("organizations")
 
 	result := OrganizationDto{}
-	if err = collection.Find(bson.M{"code": code}).One(&result); err != nil {
+	if err := collection.Find(bson.M{"code": code}).One(&result); err != nil {
 		return nil, err
 	}
 	return this.toModel(&result), nil
 }
 
 func (this *OrganizationRepo) Save(model *core.OrganizationModel) error  {
-	session, err := mgo.Dial("127.0.0.1")
-	if err != nil {
-		return err
-	}
-
+	session := db.getSession();
+	session.SetMode(mgo.Strong, false)
 	defer session.Close()
-
-	credentials := mgo.Credential {
-		Username: "oddbits",
-		Password: "yellowcamelridesbike",
-	}
-	if err = session.Login(&credentials); err != nil {
-		return err
-	}
-
-	session.SetMode(mgo.Strong, true)
 
 	collection := session.DB("oddbits").C("organizations")
 
@@ -93,7 +63,7 @@ func (this *OrganizationRepo) Save(model *core.OrganizationModel) error  {
 		Unique:     true,
 	}
 	
-	if err = collection.EnsureIndex(index); err != nil {
+	if err := collection.EnsureIndex(index); err != nil {
 		return err
 	}
 
@@ -105,28 +75,15 @@ func (this *OrganizationRepo) Save(model *core.OrganizationModel) error  {
 	} else {
 		selector = bson.M{"code": dto.Code}
 	}
-	_, err = collection.Upsert(selector, &dto)
+	_, err := collection.Upsert(selector, &dto)
 
 	return err
 }
 
 func (this *OrganizationRepo) Delete(code string) error  {
-	session, err := mgo.Dial("127.0.0.1")
-	if err != nil {
-		return err
-	}
-
+	session := db.getSession();
+	session.SetMode(mgo.Eventual, false)
 	defer session.Close()
-
-	credentials := mgo.Credential {
-		Username: "oddbits",
-		Password: "yellowcamelridesbike",
-	}
-	if err = session.Login(&credentials); err != nil {
-		return err
-	}
-
-	session.SetMode(mgo.Strong, true)
 
 	collection := session.DB("oddbits").C("organizations")
 

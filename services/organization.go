@@ -2,6 +2,7 @@ package services
 
 import (
 	"github.com/oddbitsio/api/core"
+	"github.com/oddbitsio/api/mdb-repos"
 )
 
 type IOrganizationRepo interface {
@@ -12,6 +13,12 @@ type IOrganizationRepo interface {
 
 type OrganizationSvc struct {
 	OrganizationRepo IOrganizationRepo
+}
+
+func CreateOrganizaitonSvc() *OrganizationSvc {
+	return &OrganizationSvc {
+		OrganizationRepo: &mdbrepos.OrganizationRepo { },
+	}
 }
 
 func (this *OrganizationSvc) Get(code string) (*core.OrganizationModel, error) {

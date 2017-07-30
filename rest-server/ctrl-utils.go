@@ -9,18 +9,13 @@ import (
 	"github.com/oddbitsio/api/core"
 )
 
-type ICtrlUtils interface {
-	GetParams(request *http.Request) map[string]string 
-	WriteJsonResult(writer http.ResponseWriter, request *http.Request, result core.IModel, err error) 
-}
+type ctrlUtils struct { }
 
-type CtrlUtils struct { }
-
-func (this *CtrlUtils) GetParams(request *http.Request) map[string]string {
+func (this *ctrlUtils) getParams(request *http.Request) map[string]string {
 	return mux.Vars(request);
 }
 
-func (this *CtrlUtils) WriteJsonResult(writer http.ResponseWriter, request *http.Request, result core.IModel, err error) {
+func (this *ctrlUtils) writeJsonResult(writer http.ResponseWriter, request *http.Request, result core.IModel, err error) {
 	if err != nil {
 		http.Error(writer, err.Error(), http.StatusBadRequest)
 	} else if result.IsEmpty() {
