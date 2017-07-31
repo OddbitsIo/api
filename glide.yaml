@@ -1,2 +1,9 @@
 package: github.com/oddbitsio/api
-import: []
+import:
+- package: github.com/gorilla/mux
+  version: ~1.4.0
+- package: gopkg.in/mgo.v2
+  subpackages:
+  - bson
+- package: github.com/gorilla/handlers
+  version: ~1.2.1
