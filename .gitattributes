@@ -1,0 +1,21 @@
+* text=auto
+
+*.doc diff=astextplain
+*.docx diff=astextplain
+*.pdf diff=astextplain
+*.md text
+*.csv text
+*.sql text
+*.yaml text
+*.go text
+*.lock text
+*.json text
+
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.tif binary
+*.tiff binary
+*.ico binary
+*.svg binary
