@@ -1,19 +1,34 @@
 package mdbrepos
 
 import (
+	"os"
 	"gopkg.in/mgo.v2"
 )
 
 func Init() error {
-	session, err := mgo.Dial("127.0.0.1")
+
+	conn := os.Getenv("MONGO_CONNECTION")
+	if (conn == "") {
+		panic("MONGO_CONNECTION is not defined")
+	}
+	user := os.Getenv("MONGO_USERNAME")
+	if (user == "") {
+		panic("MONGO_USERNAME is not defined")
+	}
+	password := os.Getenv("MONGO_PASSWORD")
+	if (password == "") {
+		panic("MONGO_PASSWORD is not defined")
+	}
+
+	session, err := mgo.Dial(conn)
 	if err != nil {
 		return err
 	}
 	session.SetMode(mgo.Monotonic, true)
 	
 	credentials := mgo.Credential {
-		Username: "oddbits",
-		Password: "yellowcamelridesbike",
+		Username: user,
+		Password: password,
 	}
 	if err = session.Login(&credentials); err != nil {
 		return err
