@@ -2,14 +2,19 @@ package mdbrepos
 
 import (
 	"os"
+	"fmt"
 	"gopkg.in/mgo.v2"
 )
 
 func Init() error {
 
-	conn := os.Getenv("MONGO_CONNECTION")
-	if (conn == "") {
-		panic("MONGO_CONNECTION is not defined")
+	host := os.Getenv("MONGO_HOST")
+	if (host == "") {
+		panic("MONGO_HOST is not defined")
+	}
+	port := os.Getenv("MONGO_PORT")
+	if (port == "") {
+		panic("MONGO_PORT is not defined")
 	}
 	user := os.Getenv("MONGO_USERNAME")
 	if (user == "") {
@@ -20,7 +25,7 @@ func Init() error {
 		panic("MONGO_PASSWORD is not defined")
 	}
 
-	session, err := mgo.Dial(conn)
+	session, err := mgo.Dial(fmt.Sprintf("%s:%s", host, port))
 	if err != nil {
 		return err
 	}
